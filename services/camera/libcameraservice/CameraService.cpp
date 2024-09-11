@@ -33,6 +33,7 @@
 #include <android/hardware/ICamera.h>
 #include <android/hardware/ICameraClient.h>
 
+#include <android-base/properties.h>
 #include <android-base/macros.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
@@ -91,7 +92,7 @@ namespace {
 }; // namespace anonymous
 
 namespace android {
-
+using android::base::SetProperty;
 using base::StringPrintf;
 using binder::Status;
 using namespace camera3;
@@ -3574,6 +3575,13 @@ status_t CameraService::BasicClient::startCameraOps() {
     }
 
     mOpsActive = true;
+    if (strcmp(String8(mClientPackageName).string(), "com.zui.camera") == 0) {
+        SetProperty("sys.camera.packagename.zui", "1");
+        ALOGI("Enabling Zui camera mode");
+    } else {
+        SetProperty("sys.camera.packagename.zui", "0");
+        ALOGI("Disabling Zui camera mode");
+    }
 
     // Transition device availability listeners from PRESENT -> NOT_AVAILABLE
     sCameraService->updateStatus(StatusInternal::NOT_AVAILABLE, mCameraIdStr);
